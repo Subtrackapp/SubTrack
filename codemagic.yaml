@@ -25,22 +25,26 @@ workflows:
           set -e
           npm install
 
-      - name: Prepare web assets
+            - name: Prepare web assets
         script: |
           set -e
           mkdir -p www
-          cp index.html manifest.webmanifest sw.js apple-touch-icon.png subtrack-icon-192.png www/
+          cp index.html manifest.webmanifest sw.js apple-touch-icon.png subtract-icon-192.png www/
 
       - name: Add iOS platform
         script: |
           set -e
+          pwd
+          ls -la
+          cat capacitor.config.json
+          npx cap --version
           npx cap add ios
 
       - name: Sync Capacitor
         script: |
           set -e
           npx cap sync ios
-
+          
       - name: Configure code signing
         script: |
           set -e
