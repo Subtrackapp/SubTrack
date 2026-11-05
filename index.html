@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#17243d">
+<meta name="theme-color" content="#09070d">
 <meta name="description" content="SubTrack hilft dir, Abonnements, Kosten und Kündigungsfristen im Blick zu behalten.">
-<title>SubTrack 3.0 – Abo Manager</title>
+<title>SubTrack – Abo Manager</title>
 <style>
 *{box-sizing:border-box}
 :root{--navy:#202b45;--blue:#2860b8;--ink:#202833;--muted:#687386;--line:#e4e8ef;--bg:#f3f5f9;--red:#c93640;--red-bg:#fff0f0;--amber:#9a6500;--amber-bg:#fff7e5}
@@ -67,6 +67,101 @@ button{transition:transform .15s ease,filter .15s ease}button:hover{filter:brigh
 .current-plan{font-size:12px;color:#24633d;background:#eaf7ef;padding:7px 9px;border-radius:8px;display:inline-block;font-weight:700}
 .section-kicker{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#71809a;font-weight:800;margin-bottom:7px}
 @media(max-width:560px){.plan-panel{grid-template-columns:1fr}header h1{font-size:27px}}
+
+
+/* SubTrack – Dark Magenta Design */
+:root{
+  --navy:#09070d;
+  --blue:#ed0b91;
+  --ink:#f8f4fa;
+  --muted:#b8adbd;
+  --line:#382536;
+  --bg:#0b080e;
+  --red:#ff5574;
+  --red-bg:#35131f;
+  --amber:#ffd166;
+  --amber-bg:#352713;
+  --premium:#ff1493;
+}
+html{background:#0b080e;color-scheme:dark}
+body{
+  background:
+    radial-gradient(ellipse at 50% -12%,rgba(236,0,140,.19),transparent 42%),
+    linear-gradient(180deg,#0b080e 0%,#100a13 55%,#08070b 100%);
+  color:var(--ink);
+}
+header{
+  background:linear-gradient(115deg,#09070d 0%,#21091c 58%,#3b092b 100%);
+  border-bottom:1px solid rgba(255,20,147,.38);
+  box-shadow:0 8px 30px rgba(255,0,145,.10);
+  text-align:center;
+}
+header h1{
+  background:linear-gradient(90deg,#fff 25%,#ff8bd0 58%,#ff1493 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:-.8px;
+}
+header p{color:#d8c4d5}
+main{max-width:760px}
+.summary{
+  background:linear-gradient(130deg,#ff31ad 0%,#e90083 52%,#8f075c 100%);
+  border:1px solid rgba(255,145,211,.55);
+  box-shadow:0 12px 35px rgba(237,11,145,.23),inset 0 1px rgba(255,255,255,.22);
+}
+.stat,.card,.plan-card,.subscription{
+  background:linear-gradient(155deg,#1b151f 0%,#120e16 100%);
+  border:1px solid #382536;
+  color:#f8f4fa;
+  box-shadow:0 9px 28px rgba(0,0,0,.24);
+}
+.stat-label,.muted,.form-note,.plan-note{color:#b8adbd}
+.stat-value,.subscription strong,.plan-card h2,.savings-box strong{color:#fff}
+h2{color:#fff}
+input,select,textarea{
+  background:#100c14!important;
+  color:#fff!important;
+  border:1px solid #51334b!important;
+}
+input::placeholder,textarea::placeholder{color:#938496}
+input:focus,select:focus,textarea:focus{
+  outline:2px solid rgba(255,20,147,.24)!important;
+  border-color:#ff1493!important;
+}
+button{transition:transform .15s ease,filter .15s ease,box-shadow .15s ease}
+button:focus-visible{outline:3px solid rgba(255,20,147,.45);outline-offset:2px}
+.save,.edit,.premium-button{
+  background:linear-gradient(105deg,#ff35b2,#ed078d 58%,#b80070);
+  color:#fff;
+  box-shadow:0 5px 17px rgba(237,11,145,.18);
+}
+.save:hover,.edit:hover,.premium-button:hover{filter:brightness(1.12)}
+.secondary{background:#302331;color:#f5eaf3;border:1px solid #56364e}
+.delete{background:#7e203c;color:#fff}
+.alert-soon{background:#392b18;color:#ffd77e}
+.alert-overdue{background:#3a1722;color:#ff9bad}
+.cancel-tools,.savings-box{background:#1b1420;border:1px solid #382536}
+.cancel-status{background:#302331;color:#f5eaf3}
+.cancel-status.sent{background:#392b18;color:#ffd77e}
+.cancel-status.confirmed{background:#123426;color:#9be5b6}
+.plan-card.premium{
+  border:1.5px solid #a82c79;
+  background:linear-gradient(155deg,#291326 0%,#160d19 100%);
+  box-shadow:0 8px 28px rgba(237,11,145,.12);
+}
+.plan-tag{color:#ffc1e5;background:#3c1a32}
+.premium .plan-tag{color:#ffb5df;background:#4b1740}
+.plan-list{color:#dfd2e0}
+.current-plan{color:#a6efc0;background:#123426}
+.section-kicker{color:#c5a9c1}
+.goal-progress{background:#392a3a}
+.goal-progress span{background:linear-gradient(90deg,#ff70c5,#ed078d)}
+.empty{color:#b8adbd}
+.count,.caption,.yearly{color:#fff}
+a{color:#ff75c8}
+@media(max-width:560px){
+  header{padding:25px 16px 28px}
+  .summary{box-shadow:0 10px 28px rgba(237,11,145,.2)}
+}
 
 </style>
 </head>
