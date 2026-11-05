@@ -1,0 +1,6 @@
+{
+  "appId": "com.subtrack.app",
+  "appName": "SubTrack",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
