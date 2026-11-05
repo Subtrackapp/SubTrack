@@ -24,7 +24,8 @@ workflows:
         script: |
           set -e
           npm install --include=dev
-          npm ls @capacitor/cli
+          ls -la node_modules/.bin/
+          npx cap --version
 
             - name: Prepare web assets
         script: |
