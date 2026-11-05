@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17243d">
+<meta name="description" content="SubTrack hilft dir, Abonnements, Kosten und Kündigungsfristen im Blick zu behalten.">
+<title>SubTrack 3.0 – Abo Manager</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#202b45;--blue:#2860b8;--ink:#202833;--muted:#687386;--line:#e4e8ef;--bg:#f3f5f9;--red:#c93640;--red-bg:#fff0f0;--amber:#9a6500;--amber-bg:#fff7e5}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:white;padding:28px 20px;text-align:center}
+header h1{margin:0;font-size:28px}header p{margin:8px 0 0;color:#cbd3e3}
+main{max-width:760px;margin:25px auto;padding:0 15px 30px}
+.summary{background:linear-gradient(135deg,#2860b8,#17478f);color:white;border-radius:16px;padding:25px 20px;text-align:center;margin-bottom:18px;box-shadow:0 5px 18px rgba(40,96,184,.16)}
+.caption{font-size:15px;opacity:.92}.total{font-size:38px;font-weight:bold;margin:8px 0 5px}.yearly{font-size:15px;opacity:.95}.count{font-size:13px;margin-top:7px;opacity:.9}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:22px}
+.stat,.card{background:white;border-radius:15px;box-shadow:0 3px 14px rgba(0,0,0,.05)}
+.stat{padding:16px}.stat-label{color:var(--muted);font-size:13px}.stat-value{font-size:21px;font-weight:bold;margin-top:7px}
+.card{padding:22px;margin-bottom:22px}h2{font-size:20px;margin:0 0 18px}
+label{display:block;font-weight:600;margin:13px 0 7px}
+input,select{width:100%;padding:12px;border:1px solid #ccd2dc;border-radius:9px;font-size:16px;background:white;color:var(--ink)}
+input:focus,select:focus{outline:2px solid rgba(40,96,184,.2);border-color:var(--blue)}
+button{border:0;border-radius:9px;padding:12px 16px;color:white;font-size:15px;font-weight:bold;cursor:pointer}
+button:focus-visible{outline:3px solid rgba(40,96,184,.3);outline-offset:2px}
+.save{width:100%;background:var(--blue);margin-top:18px}.save:hover{background:#1f4f9b}
+.secondary{background:#edf1f7;color:#344158}.subscription{border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.subscription strong{font-size:17px}.subscription p{margin:8px 0}
+.muted{display:block;color:var(--muted);font-size:13px;margin-top:7px}
+.alert{display:block;margin-top:9px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:bold}
+.alert-soon{color:var(--amber);background:var(--amber-bg)}.alert-overdue{color:var(--red);background:var(--red-bg)}
+.actions{display:flex;gap:9px;margin-top:13px}.actions button{flex:1}.edit{background:var(--blue)}.delete{background:var(--red)}
+.empty{color:var(--muted);text-align:center;padding:12px 0}
+.list-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.list-tools label{margin:0;white-space:nowrap}.list-tools select{max-width:220px;padding:9px;font-size:14px}
+.form-note{color:var(--muted);font-size:12px;margin-top:8px}
+.cancel-tools{margin-top:12px;padding:14px;background:#f5f7fb;border-radius:10px}
+.cancel-tools label{margin-top:10px}.cancel-tools .actions{flex-wrap:wrap}.cancel-tools .actions button{min-width:130px}
+.cancel-status{display:inline-block;margin-top:9px;padding:6px 9px;border-radius:7px;background:#edf1f7;color:#344158;font-size:12px;font-weight:bold}
+.cancel-status.sent{background:#fff7e5;color:#8a5a00}.cancel-status.confirmed{background:#e8f6ed;color:#21663a}
+.savings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.savings-box{background:#f5f7fb;border-radius:10px;padding:14px}.savings-box strong{display:block;font-size:20px;margin-top:6px}.goal-progress{height:10px;background:#e4e8ef;border-radius:99px;overflow:hidden;margin-top:12px}.goal-progress span{display:block;height:100%;width:0;background:#2860b8;transition:width .2s}.candidate-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}.candidate-toggle input{width:auto;margin:0}.goal-form{display:flex;gap:9px;align-items:end}.goal-form>div{flex:1}.goal-form label{margin-top:0}.goal-form button{min-height:44px}
+@media(max-width:480px){.savings-grid{grid-template-columns:1fr}.goal-form{align-items:stretch;flex-direction:column}}
+
+@media(max-width:480px){header h1{font-size:24px}.total{font-size:32px}.card{padding:18px}.stats{gap:9px}.stat{padding:13px}.stat-value{font-size:18px}.actions{flex-direction:column}.list-tools{align-items:flex-start;flex-direction:column}.list-tools select{max-width:none}}
+
+/* SubTrack 3.0 – visuelle Überarbeitung */
+:root{--navy:#17243d;--blue:#356fe0;--ink:#172033;--muted:#68758b;--line:#e5eaf2;--bg:#f4f7fc;--premium:#7557d8}
+body{background:radial-gradient(circle at 10% 0%,#eaf0ff 0,transparent 34%),var(--bg);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(120deg,#17243d,#263e68);padding:30px 20px 34px;text-align:left}
+header h1,header p{max-width:760px;margin-left:auto;margin-right:auto}
+header h1{font-size:30px;letter-spacing:-.7px}header p{color:#d4def1;font-size:14px}
+main{margin-top:22px}
+.card,.stat{border:1px solid rgba(222,229,240,.9);box-shadow:0 8px 26px rgba(27,48,82,.055)}
+.card{border-radius:18px}.stat{border-radius:16px}
+.summary{border-radius:20px;background:linear-gradient(135deg,#356fe0,#244eae);box-shadow:0 12px 28px rgba(53,111,224,.18)}
+button{transition:transform .15s ease,filter .15s ease}button:hover{filter:brightness(.97);transform:translateY(-1px)}
+.plan-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 22px}
+.plan-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px;box-shadow:0 8px 26px rgba(27,48,82,.05)}
+.plan-card.premium{border:1.5px solid #c9bdf5;background:linear-gradient(160deg,#fff 0%,#f7f4ff 100%)}
+.plan-card h2{margin:0 0 8px;font-size:18px}.plan-price{font-size:25px;font-weight:800;letter-spacing:-.6px;margin:8px 0}.plan-price small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.plan-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#365da8;background:#edf3ff;padding:5px 8px;border-radius:99px;margin-bottom:10px}
+.premium .plan-tag{color:#6245b8;background:#eee9ff}
+.plan-list{padding-left:18px;margin:12px 0 0;color:#4c5870;font-size:13px;line-height:1.8}
+.plan-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:12px}
+.premium-button{width:100%;margin-top:14px;background:var(--premium)}
+.current-plan{font-size:12px;color:#24633d;background:#eaf7ef;padding:7px 9px;border-radius:8px;display:inline-block;font-weight:700}
+.section-kicker{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#71809a;font-weight:800;margin-bottom:7px}
+@media(max-width:560px){.plan-panel{grid-template-columns:1fr}header h1{font-size:27px}}
+
+</style>
+</head>
+<body>
+<header><h1>SubTrack – Abo Manager</h1><p>Alle Abonnements und Kosten im Überblick</p></header>
+<main>
+<section class="summary" aria-live="polite">
+<div class="caption">Deine monatlichen Abo-Kosten</div><div class="total" id="total">0,00 €</div>
+<div class="yearly" id="yearlytotal">0,00 € pro Jahr</div><div class="count" id="count">0 aktive Abonnements</div>
+</section>
+<section class="card" style="padding:14px 18px;margin-bottom:18px">
+ <button type="button" class="save" id="enableNotifications" style="margin-top:0">Erinnerungen aktivieren</button>
+ <div class="form-note" id="notificationStatus" aria-live="polite">Browser-Benachrichtigungen sind noch nicht aktiviert.</div>
+</section>
+<section class="card" style="padding:14px 18px;margin-bottom:18px">
+ <h2 style="margin-bottom:8px">Datensicherung</h2>
+ <p class="form-note">Sichere deine Abos und Kündigungsangaben als Datei oder stelle eine frühere Sicherung wieder her.</p>
+ <div class="actions">
+  <button type="button" class="edit" id="exportData">Daten exportieren</button>
+  <button type="button" class="secondary" id="importData">Daten importieren</button>
+ </div>
+ <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+ <div class="form-note" id="backupStatus" aria-live="polite">Die Sicherungsdatei enthält deine Abos und zugehörigen Kündigungsdaten.</div>
+</section>
+<section class="plan-panel" aria-label="SubTrack Tarife">
+ <article class="plan-card">
+  <span class="plan-tag">Dein aktueller Einstieg</span>
+  <h2>SubTrack Free</h2>
+  <div class="plan-price">0 € <small>/ dauerhaft kostenlos</small></div>
+  <span class="current-plan">Basisversion</span>
+  <ul class="plan-list">
+   <li>Abos und Kosten verwalten</li>
+   <li>Kündigungsfristen im Blick behalten</li>
+   <li>Kündigungsschreiben vorbereiten</li>
+   <li>Sparziel und Datensicherung</li>
+  </ul>
+ </article>
+ <article class="plan-card premium">
+  <span class="plan-tag">Geplant</span>
+  <h2>SubTrack Premium</h2>
+  <div class="plan-price">2,99 € <small>/ Monat · Preisvorschlag</small></div>
+  <ul class="plan-list">
+   <li>Erweiterte Sparanalysen</li>
+   <li>Intelligente Kündigungsvorschläge</li>
+   <li>Erweiterte Statistiken</li>
+   <li>Später: Cloud-Synchronisierung</li>
+  </ul>
+  <button type="button" class="premium-button" id="premiumInfo">Premium vormerken</button>
+  <p class="plan-note">Premium ist noch nicht buchbar. Es wird kein Kauf ausgelöst und es werden keine Zahlungsdaten abgefragt.</p>
+ </article>
+</section>
+<section class="card" id="savingsPanel">
+<h2>Dein Sparpotenzial</h2>
+<p class="form-note">Markiere Abos als Kündigungskandidaten. SubTrack berechnet daraus eine mögliche Ersparnis – eine Kündigung wird nicht automatisch ausgelöst.</p>
+<div class="savings-grid">
+ <div class="savings-box"><span class="stat-label">Mögliche Ersparnis pro Monat</span><strong id="potentialMonthly">0,00 €</strong></div>
+ <div class="savings-box"><span class="stat-label">Mögliche Ersparnis pro Jahr</span><strong id="potentialYearly">0,00 €</strong></div>
+</div>
+<div class="goal-form" style="margin-top:18px">
+ <div><label for="savingsGoal">Mein monatliches Sparziel (€)</label><input id="savingsGoal" type="number" min="0" step="0.01" placeholder="z. B. 100"></div>
+ <button type="button" class="edit" id="saveGoal">Sparziel speichern</button>
+</div>
+<div class="form-note" id="goalStatus" aria-live="polite">Lege ein Sparziel fest, um deinen Fortschritt zu sehen.</div>
+<div class="goal-progress" aria-label="Fortschritt zum Sparziel"><span id="goalProgress"></span></div>
+</section>
+<section class="stats">
+<div class="stat"><div class="stat-label">Kündigungen in den nächsten 7 Tagen</div><div class="stat-value" id="upcomingCount">0</div></div>
+<div class="stat"><div class="stat-label">Monatliche Gesamtkosten</div><div class="stat-value" id="averageMonthly">0,00 €</div></div>
+</section>
+<section class="card">
+<h2 id="formTitle">+ Neues Abo hinzufügen</h2>
+<form id="aboForm">
+<label for="name">Anbieter / Name</label><input id="name" type="text" placeholder="z. B. Netflix" required>
+<label for="price">Preis in Euro</label><input id="price" type="number" min="0.01" step="0.01" placeholder="z. B. 12,99" required>
+<label for="interval">Zahlungsintervall</label><select id="interval"><option value="monthly">Monatlich</option><option value="yearly">Jährlich</option></select>
+<label for="date">Nächste Zahlung</label><input id="date" type="date" required>
+<label for="cancelDate">Kündigungsdatum (optional)</label><input id="cancelDate" type="date">
+<button class="save" id="saveButton" type="submit">Abo speichern</button>
+<button class="secondary" id="cancelEdit" type="button" style="display:none;width:100%;margin-top:9px">Bearbeiten abbrechen</button>
+<div class="form-note">Deine Daten werden lokal in diesem Browser gespeichert.</div>
+</form>
+</section>
+<section class="card">
+<h2>Meine Abonnements</h2>
+<div class="list-tools"><label for="sortOrder">Sortieren nach</label>
+<select id="sortOrder"><option value="date">Nächste Zahlung</option><option value="name">Name (A–Z)</option><option value="price">Preis (höchster zuerst)</option><option value="cancel">Kündigungsdatum</option></select></div>
+<div id="list"><p class="empty">Noch keine Abos vorhanden.</p></div>
+</section>
+<section class="card" id="cancelPanel" hidden>
+<h2>Kündigungsassistent</h2>
+<p id="cancelFor" class="muted"></p>
+<p>Ergänze die Angaben, damit SubTrack ein passendes Kündigungsschreiben erstellen kann. Prüfe den Text vor dem Versand.</p>
+<div class="cancel-tools">
+<label for="customerName">Dein vollständiger Name</label><input id="customerName" type="text" placeholder="Vorname Nachname">
+<label for="customerAddress">Deine Anschrift</label><input id="customerAddress" type="text" placeholder="Straße, PLZ und Ort">
+<label for="customerNumber">Kunden- oder Vertragsnummer (optional)</label><input id="customerNumber" type="text" placeholder="z. B. Kundennummer">
+<label for="providerEmail">E-Mail-Adresse des Anbieters (optional)</label><input id="providerEmail" type="email" placeholder="service@anbieter.de">
+<label for="desiredEnd">Gewünschter Kündigungstermin (optional)</label><input id="desiredEnd" type="date">
+<label for="letterPreview">Kündigungsschreiben – bitte prüfen</label><textarea id="letterPreview" rows="12" style="width:100%;padding:12px;border:1px solid #ccd2dc;border-radius:9px;font:14px Arial,sans-serif;line-height:1.5"></textarea>
+<div class="actions"><button type="button" class="edit" id="refreshLetter">Text aktualisieren</button><button type="button" class="secondary" id="copyLetter">Text kopieren</button><button type="button" class="save" id="sendLetter">In E-Mail übernehmen</button></div>
+<div class="form-note">„In E-Mail übernehmen“ öffnet dein E-Mail-Programm mit vorbereitetem Text. Du musst die Nachricht selbst prüfen und absenden. Ohne Anbieter-E-Mail kannst du den Text kopieren und über den offiziellen Kündigungsweg des Anbieters versenden.</div>
+<label for="cancelStatusSelect">Kündigungsstatus</label><select id="cancelStatusSelect"><option value="prepared">Kündigung vorbereitet</option><option value="sent">Kündigung versendet</option><option value="confirmed">Kündigung bestätigt</option></select>
+<label for="confirmationNote">Notiz / Bestätigungsnummer (optional)</label><input id="confirmationNote" type="text" placeholder="z. B. Bestätigung am 12.05. erhalten">
+<div class="actions"><button type="button" class="edit" id="saveCancelDetails">Angaben speichern</button><button type="button" class="secondary" id="closeCancel">Schließen</button></div>
+</div>
+</section>
+</main>
+<script>
+const STORAGE_KEY="subtrack-abos";
+let subscriptions=[];
+let editingIndex=null;
+let cancellationIndex=null;
+try{
+ const saved=localStorage.getItem(STORAGE_KEY);
+ subscriptions=saved?JSON.parse(saved):[];
+ if(!Array.isArray(subscriptions))subscriptions=[];
+}catch(error){subscriptions=[];alert("Die gespeicherten Abos konnten leider nicht gelesen werden.");}
+const money=value=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(value)||0);
+const dateFormat=value=>{if(!value)return"Nicht angegeben";const p=value.split("-");return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:value;};
+function daysUntil(value){
+ if(!value)return null;
+ const target=new Date(value+"T00:00:00");
+ if(Number.isNaN(target.getTime()))return null;
+ const today=new Date();today.setHours(0,0,0,0);
+ return Math.round((target-today)/86400000);
+}
+function save(){
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(subscriptions));render();}
+ catch(error){alert("Speichern nicht möglich. Bitte prüfe, ob dein Browser lokale Speicherung erlaubt.");}
+}
+function resetForm(){
+ document.getElementById("aboForm").reset();editingIndex=null;
+ document.getElementById("formTitle").textContent="+ Neues Abo hinzufügen";
+ document.getElementById("saveButton").textContent="Abo speichern";
+ document.getElementById("cancelEdit").style.display="none";
+}
+function startEdit(index){
+ const abo=subscriptions[index];if(!abo)return;editingIndex=index;
+ document.getElementById("name").value=abo.name||"";
+ document.getElementById("price").value=abo.price;
+ document.getElementById("interval").value=abo.interval||"monthly";
+ document.getElementById("date").value=abo.date||"";
+ document.getElementById("cancelDate").value=abo.cancelDate||"";
+ document.getElementById("formTitle").textContent="Abo bearbeiten";
+ document.getElementById("saveButton").textContent="Änderungen speichern";
+ document.getElementById("cancelEdit").style.display="block";
+ document.getElementById("name").focus();
+ document.getElementById("aboForm").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function render(){
+ const list=document.getElementById("list");list.innerHTML="";
+ let monthlyTotal=0,yearlyTotal=0,upcomingCount=0;
+ subscriptions.forEach(abo=>{
+  const price=Number(abo.price)||0;
+  monthlyTotal+=abo.interval==="yearly"?price/12:price;
+  yearlyTotal+=abo.interval==="yearly"?price:price*12;
+  const days=daysUntil(abo.cancelDate);if(days!==null&&days>=0&&days<=7)upcomingCount++;
+ });
+ const sortOrder=document.getElementById("sortOrder").value;
+ const sorted=subscriptions.map((abo,index)=>({abo,index}));
+ sorted.sort((a,b)=>{
+  if(sortOrder==="name")return(a.abo.name||"").localeCompare(b.abo.name||"","de");
+  if(sortOrder==="price")return(Number(b.abo.price)||0)-(Number(a.abo.price)||0);
+  if(sortOrder==="cancel")return(a.abo.cancelDate||"9999").localeCompare(b.abo.cancelDate||"9999");
+  return(a.abo.date||"9999").localeCompare(b.abo.date||"9999");
+ });
+ sorted.forEach(({abo,index})=>{
+  const item=document.createElement("div");item.className="subscription";
+  const heading=document.createElement("strong");heading.textContent=abo.name||"Unbenanntes Abo";
+  const details=document.createElement("p");details.textContent=`${money(abo.price)} ${abo.interval==="yearly"?"pro Jahr":"pro Monat"}`;
+  const nextPayment=document.createElement("small");nextPayment.className="muted";nextPayment.textContent=`Nächste Zahlung: ${dateFormat(abo.date)}`;
+  const cancellation=document.createElement("small");cancellation.className="muted";
+  cancellation.textContent=abo.cancelDate?`Kündigungsdatum: ${dateFormat(abo.cancelDate)}`:"Kein Kündigungsdatum eingetragen";
+  const candidateLabel=document.createElement("label");candidateLabel.className="candidate-toggle";
+  const candidate=document.createElement("input");candidate.type="checkbox";candidate.checked=Boolean(abo.savingsCandidate);
+  candidate.addEventListener("change",()=>{abo.savingsCandidate=candidate.checked;save();});
+  const candidateText=document.createElement("span");candidateText.textContent="Als Kündigungskandidat markieren";
+  candidateLabel.append(candidate,candidateText);
+  const days=daysUntil(abo.cancelDate);let reminder=null;
+  if(days!==null&&days>=0&&days<=7){
+   reminder=document.createElement("div");reminder.className="alert alert-soon";
+   reminder.textContent=days===0?"Achtung: Kündigung ist heute fällig!":`Achtung: Kündigung in ${days} ${days===1?"Tag":"Tagen"}!`;
+  }else if(days!==null&&days<0){
+   reminder=document.createElement("div");reminder.className="alert alert-overdue";reminder.textContent="Kündigungsdatum überschritten!";
+  }
+  const status=document.createElement("div");
+  if(abo.cancellationStatus){status.className="cancel-status"+(abo.cancellationStatus==="sent"?" sent":abo.cancellationStatus==="confirmed"?" confirmed":"");status.textContent=abo.cancellationStatus==="sent"?"Kündigung versendet":abo.cancellationStatus==="confirmed"?"Kündigung bestätigt":"Kündigung vorbereitet";}
+  const actions=document.createElement("div");actions.className="actions";
+  const cancel=document.createElement("button");cancel.className="secondary";cancel.type="button";cancel.textContent="Kündigungsassistent";cancel.addEventListener("click",()=>openCancellation(index));
+  const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.textContent="Abo bearbeiten";edit.addEventListener("click",()=>startEdit(index));
+  const remove=document.createElement("button");remove.className="delete";remove.type="button";remove.textContent="Abo löschen";
+  remove.addEventListener("click",()=>{
+   if(confirm(`Möchtest du das Abo „${abo.name}“ wirklich löschen?`)){
+    subscriptions.splice(index,1);if(editingIndex===index)resetForm();save();
+   }
+  });
+  actions.append(cancel,edit,remove);item.append(heading,details,nextPayment,cancellation,candidateLabel);if(status.textContent)item.append(status);
+  if(reminder)item.append(reminder);item.append(actions);list.appendChild(item);
+ });
+ document.getElementById("total").textContent=money(monthlyTotal);
+ document.getElementById("yearlytotal").textContent=money(yearlyTotal)+" pro Jahr";
+ document.getElementById("count").textContent=`${subscriptions.length} aktive ${subscriptions.length===1?"Abonnement":"Abonnements"}`;
+ document.getElementById("upcomingCount").textContent=upcomingCount;
+ document.getElementById("averageMonthly").textContent=money(monthlyTotal);
+ const potentialMonthly=subscriptions.filter(abo=>abo.savingsCandidate).reduce((sum,abo)=>sum+(Number(abo.price)||0)/(abo.interval==="yearly"?12:1),0);
+ document.getElementById("potentialMonthly").textContent=money(potentialMonthly);
+ document.getElementById("potentialYearly").textContent=money(potentialMonthly*12);
+ updateSavingsGoal(potentialMonthly);
+ if(subscriptions.length===0)list.innerHTML='<p class="empty">Noch keine Abos vorhanden.</p>';
+}
+
+const SAVINGS_GOAL_KEY="subtrack-savings-goal";
+function updateSavingsGoal(potentialMonthly){
+ const raw=localStorage.getItem(SAVINGS_GOAL_KEY);
+ const goal=Number(raw)||0;
+ const input=document.getElementById("savingsGoal");
+ if(document.activeElement!==input)input.value=raw||"";
+ const status=document.getElementById("goalStatus");
+ const progress=document.getElementById("goalProgress");
+ if(goal<=0){status.textContent="Lege ein monatliches Sparziel fest, um deinen Fortschritt zu sehen.";progress.style.width="0%";return;}
+ const percent=Math.min(100,(potentialMonthly/goal)*100);
+ status.textContent=`Du erreichst ${Math.round(percent)} % deines Sparziels (${money(potentialMonthly)} von ${money(goal)} monatlich).`;
+ progress.style.width=percent+"%";
+}
+document.getElementById("saveGoal").addEventListener("click",()=>{
+ const value=Number(document.getElementById("savingsGoal").value);
+ if(!Number.isFinite(value)||value<0){alert("Bitte gib ein gültiges Sparziel ab 0 € ein.");return;}
+ localStorage.setItem(SAVINGS_GOAL_KEY,String(value));
+ const potential= subscriptions.filter(abo=>abo.savingsCandidate).reduce((sum,abo)=>sum+(Number(abo.price)||0)/(abo.interval==="yearly"?12:1),0);
+ updateSavingsGoal(potential);
+ alert("Dein monatliches Sparziel wurde gespeichert.");
+});
+
+function openCancellation(index){
+ const abo=subscriptions[index];if(!abo)return;cancellationIndex=index;
+ document.getElementById("cancelFor").textContent="Kündigung für: "+(abo.name||"Abo");
+ document.getElementById("customerName").value=abo.customerName||"";
+ document.getElementById("customerAddress").value=abo.customerAddress||"";
+ document.getElementById("customerNumber").value=abo.customerNumber||"";
+ document.getElementById("providerEmail").value=abo.providerEmail||"";
+ document.getElementById("desiredEnd").value=abo.desiredEnd||"";
+ document.getElementById("cancelStatusSelect").value=abo.cancellationStatus||"prepared";
+ document.getElementById("confirmationNote").value=abo.confirmationNote||"";
+ updateLetter();document.getElementById("cancelPanel").hidden=false;
+ document.getElementById("cancelPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function updateLetter(){
+ const abo=subscriptions[cancellationIndex];if(!abo)return;
+ const name=document.getElementById("customerName").value.trim();
+ const address=document.getElementById("customerAddress").value.trim();
+ const number=document.getElementById("customerNumber").value.trim();
+ const end=document.getElementById("desiredEnd").value;
+ const dateText=end?dateFormat(end):"zum nächstmöglichen Zeitpunkt";
+ const letter=[name||"[Vor- und Nachname]",address||"[Anschrift]","","An: "+abo.name,"","Betreff: Kündigung meines Abonnements"+(number?" – Vertragsnummer "+number:""),"","Sehr geehrte Damen und Herren,","","hiermit kündige ich mein Abonnement bei Ihnen "+dateText+". Hilfsweise kündige ich zum nächstmöglichen Zeitpunkt.",number?"Meine Kunden-/Vertragsnummer lautet: "+number:"","Bitte bestätigen Sie mir den Eingang dieser Kündigung sowie das Vertragsende in Textform.","","Mit freundlichen Grüßen","",name||"[Vor- und Nachname]"].filter((line,i)=>line!==""||i===2).join("\n");
+ document.getElementById("letterPreview").value=letter;
+}
+function saveCancellation(){
+ const abo=subscriptions[cancellationIndex];if(!abo)return;
+ abo.customerName=document.getElementById("customerName").value.trim();
+ abo.customerAddress=document.getElementById("customerAddress").value.trim();
+ abo.customerNumber=document.getElementById("customerNumber").value.trim();
+ abo.providerEmail=document.getElementById("providerEmail").value.trim();
+ abo.desiredEnd=document.getElementById("desiredEnd").value;
+ abo.cancellationStatus=document.getElementById("cancelStatusSelect").value;
+ abo.confirmationNote=document.getElementById("confirmationNote").value.trim();
+ save();
+}
+
+// Browser-Erinnerungen werden beim Öffnen und während der Nutzung geprüft.
+function updateNotificationStatus(){
+ const status=document.getElementById("notificationStatus");
+ const button=document.getElementById("enableNotifications");
+ if(!("Notification" in window)){
+  status.textContent="Dieser Browser unterstützt keine Desktop-Benachrichtigungen. Die Hinweise in SubTrack bleiben verfügbar.";
+  button.disabled=true;button.textContent="Benachrichtigungen nicht verfügbar";return;
+ }
+ if(Notification.permission==="granted"){
+  status.textContent="Benachrichtigungen sind aktiviert. Fristen werden beim Öffnen und während der Nutzung geprüft.";
+  button.textContent="Benachrichtigungen aktiviert";button.disabled=true;
+ }else if(Notification.permission==="denied"){
+  status.textContent="Benachrichtigungen wurden blockiert. Du kannst sie in den Website-Einstellungen des Browsers erlauben.";
+  button.textContent="Browser-Einstellungen prüfen";button.disabled=true;
+ }else{
+  status.textContent="Aktiviere Browser-Benachrichtigungen, damit SubTrack dich bei nahenden Kündigungsfristen informieren kann.";
+ }
+}
+function checkCancellationReminders(){
+ if(!("Notification" in window)||Notification.permission!=="granted")return;
+ subscriptions.forEach(abo=>{
+  if(!abo.cancelDate||abo.cancellationStatus==="confirmed")return;
+  const days=daysUntil(abo.cancelDate);
+  if(days===null||days<0||days>7)return;
+  const now=new Date();const todayKey=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+  const key="subtrack-reminder-"+encodeURIComponent(abo.name||"Abo")+"-"+abo.cancelDate+"-"+todayKey;
+  if(localStorage.getItem(key))return;
+  const message=days===0?"Die Kündigungsfrist ist heute fällig.":`Die Kündigungsfrist endet in ${days} ${days===1?"Tag":"Tagen"}.`;
+  try{
+   const notification=new Notification("SubTrack: Kündigung nicht vergessen",{body:(abo.name||"Dein Abo")+" – "+message,tag:key});
+   notification.onclick=()=>{window.focus();notification.close();};
+   localStorage.setItem(key,"1");
+  }catch(error){console.warn("Benachrichtigung fehlgeschlagen:",error);}
+ });
+}
+
+document.getElementById("aboForm").addEventListener("submit",function(event){
+ event.preventDefault();
+ const name=document.getElementById("name").value.trim();
+ const price=Number(document.getElementById("price").value);
+ const interval=document.getElementById("interval").value;
+ const date=document.getElementById("date").value;
+ const cancelDate=document.getElementById("cancelDate").value;
+ if(!name||!Number.isFinite(price)||price<=0||!date){alert("Bitte fülle Anbieter, einen gültigen Preis und das nächste Zahlungsdatum aus.");return;}
+ const subscription={name,price,interval,date,cancelDate};
+ if(editingIndex!==null){
+  const existing=subscriptions[editingIndex]||{};
+  subscriptions[editingIndex]={...existing,...subscription};
+ }else subscriptions.push(subscription);
+ save();resetForm();render();
+});
+document.getElementById("exportData").addEventListener("click",()=>{
+ const backup={app:"SubTrack",version:2,exportedAt:new Date().toISOString(),savingsGoal:localStorage.getItem(SAVINGS_GOAL_KEY)||"",subscriptions};
+ const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement("a");
+ link.href=url;
+ link.download="SubTrack-Sicherung-"+new Date().toISOString().slice(0,10)+".json";
+ document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+ document.getElementById("backupStatus").textContent="Sicherung wurde erstellt. Bewahre die JSON-Datei an einem sicheren Ort auf.";
+});
+document.getElementById("importData").addEventListener("click",()=>{
+ document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change",async(event)=>{
+ const file=event.target.files&&event.target.files[0];
+ if(!file)return;
+ try{
+  const parsed=JSON.parse(await file.text());
+  const incoming=Array.isArray(parsed)?parsed:parsed.subscriptions;
+  if(!Array.isArray(incoming)||!incoming.every(item=>item&&typeof item==="object"&&!Array.isArray(item)&&typeof item.name==="string"&&Number.isFinite(Number(item.price)))){
+   throw new Error("Ungültiges Sicherungsformat");
+  }
+  if(!confirm("Beim Import werden die aktuell gespeicherten Abos durch die Sicherung ersetzt. Möchtest du fortfahren?"))return;
+  subscriptions=incoming.map(item=>({...item}));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(subscriptions));
+  if(parsed&&typeof parsed==="object"&&parsed.savingsGoal!==undefined)localStorage.setItem(SAVINGS_GOAL_KEY,String(parsed.savingsGoal));
+  resetForm();render();
+  document.getElementById("backupStatus").textContent="Sicherung erfolgreich importiert.";
+  alert("Deine SubTrack-Sicherung wurde erfolgreich wiederhergestellt.");
+ }catch(error){
+  alert("Die Datei konnte nicht importiert werden. Bitte wähle eine gültige SubTrack-Sicherungsdatei.");
+ }finally{event.target.value="";}
+});
+document.getElementById("cancelEdit").addEventListener("click",resetForm);
+document.getElementById("sortOrder").addEventListener("change",render);
+document.getElementById("refreshLetter").addEventListener("click",updateLetter);
+document.getElementById("copyLetter").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(document.getElementById("letterPreview").value);alert("Kündigungstext wurde kopiert.");}catch(error){document.getElementById("letterPreview").select();alert("Bitte kopiere den markierten Text mit Cmd+C (Mac) oder Strg+C.");}});
+document.getElementById("sendLetter").addEventListener("click",()=>{
+ updateLetter();const email=document.getElementById("providerEmail").value.trim();
+ if(!email){alert("Bitte trage zuerst die E-Mail-Adresse des Anbieters ein. Alternativ kannst du den Text kopieren.");return;}
+ const abo=subscriptions[cancellationIndex];const subject=encodeURIComponent("Kündigung meines Abonnements – "+(abo?.name||""));
+ location.href="mailto:"+encodeURIComponent(email)+"?subject="+subject+"&body="+encodeURIComponent(document.getElementById("letterPreview").value);
+});
+document.getElementById("saveCancelDetails").addEventListener("click",()=>{saveCancellation();alert("Kündigungsangaben wurden gespeichert.");});
+document.getElementById("closeCancel").addEventListener("click",()=>{saveCancellation();document.getElementById("cancelPanel").hidden=true;});
+document.getElementById("enableNotifications").addEventListener("click",async()=>{
+ if(!("Notification" in window)){updateNotificationStatus();return;}
+ try{await Notification.requestPermission();updateNotificationStatus();checkCancellationReminders();}
+ catch(error){document.getElementById("notificationStatus").textContent="Die Berechtigung konnte nicht angefragt werden. Bitte prüfe die Browser-Einstellungen.";}
+});
+document.getElementById("premiumInfo").addEventListener("click",()=>{
+ alert("Vielen Dank für dein Interesse an SubTrack Premium! Die Premium-Funktionen und der Bezahlvorgang werden erst in einer späteren Version freigeschaltet. Es wurde kein Abo abgeschlossen.");
+});
+render();
+updateNotificationStatus();
+checkCancellationReminders();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkCancellationReminders();});
+setInterval(checkCancellationReminders,6*60*60*1000);
+</script>
+</body>
+</html>
