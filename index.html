@@ -498,8 +498,22 @@ document.getElementById("aboForm").addEventListener("submit",function(event){
  if(editingIndex!==null){
   const existing=subscriptions[editingIndex]||{};
   subscriptions[editingIndex]={...existing,...subscription};
- }else subscriptions.push(subscription);
- save();resetForm();render();
+ }else {
+  if (subscriptions.length >= 5) {
+    alert(
+      "Du hast die 5 kostenlosen Abonnements erreicht! " +
+      "Mit SubTrack Premium für 2,99 € pro Monat kannst du " +
+      "unbegrenzt viele Abos verwalten."
+    );
+    document.getElementById("premiumInfo").scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    return;
+  }
+
+  subscriptions.push(subscription);
+} save();resetForm();render();
 });
 document.getElementById("exportData").addEventListener("click",()=>{
  const backup={app:"SubTrack",version:3,exportedAt:new Date().toISOString(),savingsGoal:localStorage.getItem(SAVINGS_GOAL_KEY)||"",subscriptions};
