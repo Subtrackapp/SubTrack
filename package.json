@@ -1,0 +1,16 @@
+{
+  "name": "subtrack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SubTrack - Abo-Verwaltung",
+  "scripts": {
+    "build": "echo SubTrack build ready"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.1"
+  }
+}
