@@ -1,6 +1,6 @@
 {
   "appId": "com.Dome.subtrack",
   "appName": "SubTrack",
-  "webDir": "www",
+  "webDir": ".",
   "bundledWebRuntime": false
 }
