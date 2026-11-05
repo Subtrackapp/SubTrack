@@ -23,7 +23,8 @@ workflows:
       - name: Install dependencies
         script: |
           set -e
-          npm install
+          npm install --include=dev
+          npm ls @capacitor/cli
 
             - name: Prepare web assets
         script: |
@@ -34,11 +35,9 @@ workflows:
       - name: Add iOS platform
         script: |
           set -e
-          pwd
-          ls -la
-          cat capacitor.config.json
-          npx cap --version
-          npx cap add ios
+          ls -la node_modules/.bin/ 
+          ./node_modules/.bin/cap --version
+          ./node_modules/.bin/cap add ios
 
       - name: Sync Capacitor
         script: |
