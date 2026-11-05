@@ -29,7 +29,7 @@ workflows:
         script: |
           set -e
           mkdir -p www
-          cp index.html manifest.webmanifest sw.js apple-touch-icon.png subtract-icon-192.png www/
+          cp index.html www/
 
       - name: Add iOS platform
         script: |
