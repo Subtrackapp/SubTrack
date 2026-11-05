@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "subtrack-v1";
+const CACHE_NAME = "subtrack-v2";
 
 const FILES_TO_CACHE = [
   "./",
