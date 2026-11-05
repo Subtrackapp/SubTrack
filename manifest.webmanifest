@@ -1,0 +1,19 @@
+
+
+{
+"name": "SubTrack – Abo Manager",
+"short_name": "SubTrack",
+"description": "Verwalte deine Abonnements und Kündigungsfristen.",
+"start_url": "./",
+"scope": "./",
+"display": "standalone",
+"background_color": "#0b080e",
+"theme_color": "#09070d",
+"icons": [
+  {
+    "src": "./subtrack-icon-192.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  }
+]
+}
