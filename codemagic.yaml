@@ -19,31 +19,29 @@ workflows:
 
       xcode: latest
 
-    scripts:
-      - name: Install dependencies
-        script: |
-          set -e
-          npm install --include=dev
-          ls -la node_modules/.bin/
-          npx cap --version
+    
+scripts:
+  - name: Install dependencies
+    script: |
+      set -e
+      npm install
+      test -x node_modules/.bin/cap
 
-            - name: Prepare web assets
-        script: |
-          set -e
-          mkdir -p www
-          cp index.html www/
+  - name: Prepare web assets
+    script: |
+      set -e
+      mkdir -p www
+      cp index.html www/
 
-      - name: Add iOS platform
-        script: |
-          set -e
-          ls -la node_modules/.bin/ 
-          ./node_modules/.bin/cap --version
-          ./node_modules/.bin/cap add ios
+  - name: Add iOS platform
+    script: |
+      set -e
+      npx cap add ios
 
-      - name: Sync Capacitor
-        script: |
-          set -e
-          npx cap sync ios
+  - name: Sync Capacitor
+    script: |
+      set -e
+      npx cap sync ios
           
       - name: Configure code signing
         script: |
