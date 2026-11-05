@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#09070d">
 <meta name="description" content="SubTrack hilft dir, Abonnements, Kosten und Kündigungsfristen im Blick zu behalten.">
 <title>SubTrack – Abo Manager</title>
+<meta name="application-name" content="SubTrack">
   <link rel="icon" type="image/png" sizes="192x192" href="subtrack-icon-192.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -158,6 +159,9 @@ button:focus-visible{outline:3px solid rgba(255,20,147,.45);outline-offset:2px}
 .goal-progress{background:#392a3a}
 .goal-progress span{background:linear-gradient(90deg,#ff70c5,#ed078d)}
 .empty{color:#b8adbd}
+.category-chip{display:inline-block;margin:8px 0 2px;padding:5px 9px;border-radius:999px;background:#3c1a32;color:#ffb5df;font-size:12px;font-weight:700}
+.search-tools{display:grid;grid-template-columns:1fr 190px;gap:10px;margin:0 0 14px}
+@media(max-width:480px){.search-tools{grid-template-columns:1fr}}
 .count,.caption,.yearly{color:#fff}
 a{color:#ff75c8}
 @media(max-width:560px){
@@ -238,6 +242,7 @@ a{color:#ff75c8}
 <form id="aboForm">
 <label for="name">Anbieter / Name</label><input id="name" type="text" placeholder="z. B. Netflix" required>
 <label for="price">Preis in Euro</label><input id="price" type="number" min="0.01" step="0.01" placeholder="z. B. 12,99" required>
+<label for="category">Kategorie</label><select id="category"><option value="Streaming">Streaming</option><option value="Software">Software</option><option value="Fitness">Fitness</option><option value="Gaming">Gaming</option><option value="Musik">Musik</option><option value="Shopping">Shopping</option><option value="Sonstiges" selected>Sonstiges</option></select>
 <label for="interval">Zahlungsintervall</label><select id="interval"><option value="monthly">Monatlich</option><option value="yearly">Jährlich</option></select>
 <label for="date">Nächste Zahlung</label><input id="date" type="date" required>
 <label for="cancelDate">Kündigungsdatum (optional)</label><input id="cancelDate" type="date">
@@ -248,6 +253,7 @@ a{color:#ff75c8}
 </section>
 <section class="card">
 <h2>Meine Abonnements</h2>
+<div class="search-tools"><input id="searchSubscriptions" type="search" placeholder="Abos oder Anbieter suchen …" aria-label="Abos suchen"><select id="categoryFilter" aria-label="Nach Kategorie filtern"><option value="all">Alle Kategorien</option><option>Streaming</option><option>Software</option><option>Fitness</option><option>Gaming</option><option>Musik</option><option>Shopping</option><option>Sonstiges</option></select></div>
 <div class="list-tools"><label for="sortOrder">Sortieren nach</label>
 <select id="sortOrder"><option value="date">Nächste Zahlung</option><option value="name">Name (A–Z)</option><option value="price">Preis (höchster zuerst)</option><option value="cancel">Kündigungsdatum</option></select></div>
 <div id="list"><p class="empty">Noch keine Abos vorhanden.</p></div>
@@ -280,6 +286,7 @@ try{
  const saved=localStorage.getItem(STORAGE_KEY);
  subscriptions=saved?JSON.parse(saved):[];
  if(!Array.isArray(subscriptions))subscriptions=[];
+ subscriptions=subscriptions.map(abo=>({...abo,category:abo.category||"Sonstiges"}));
 }catch(error){subscriptions=[];alert("Die gespeicherten Abos konnten leider nicht gelesen werden.");}
 const money=value=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(value)||0);
 const dateFormat=value=>{if(!value)return"Nicht angegeben";const p=value.split("-");return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:value;};
@@ -304,6 +311,7 @@ function startEdit(index){
  const abo=subscriptions[index];if(!abo)return;editingIndex=index;
  document.getElementById("name").value=abo.name||"";
  document.getElementById("price").value=abo.price;
+ document.getElementById("category").value=abo.category||"Sonstiges";
  document.getElementById("interval").value=abo.interval||"monthly";
  document.getElementById("date").value=abo.date||"";
  document.getElementById("cancelDate").value=abo.cancelDate||"";
@@ -323,7 +331,13 @@ function render(){
   const days=daysUntil(abo.cancelDate);if(days!==null&&days>=0&&days<=7)upcomingCount++;
  });
  const sortOrder=document.getElementById("sortOrder").value;
- const sorted=subscriptions.map((abo,index)=>({abo,index}));
+ const search=(document.getElementById("searchSubscriptions").value||"").trim().toLocaleLowerCase("de");
+ const categoryFilter=document.getElementById("categoryFilter").value;
+ const sorted=subscriptions.map((abo,index)=>({abo,index})).filter(({abo})=>{
+  const matchesSearch=!search||`${abo.name||""} ${abo.category||"Sonstiges"}`.toLocaleLowerCase("de").includes(search);
+  const matchesCategory=categoryFilter==="all"||(abo.category||"Sonstiges")==categoryFilter;
+  return matchesSearch&&matchesCategory;
+ });
  sorted.sort((a,b)=>{
   if(sortOrder==="name")return(a.abo.name||"").localeCompare(b.abo.name||"","de");
   if(sortOrder==="price")return(Number(b.abo.price)||0)-(Number(a.abo.price)||0);
@@ -333,6 +347,7 @@ function render(){
  sorted.forEach(({abo,index})=>{
   const item=document.createElement("div");item.className="subscription";
   const heading=document.createElement("strong");heading.textContent=abo.name||"Unbenanntes Abo";
+  const category=document.createElement("div");category.className="category-chip";category.textContent=abo.category||"Sonstiges";
   const details=document.createElement("p");details.textContent=`${money(abo.price)} ${abo.interval==="yearly"?"pro Jahr":"pro Monat"}`;
   const nextPayment=document.createElement("small");nextPayment.className="muted";nextPayment.textContent=`Nächste Zahlung: ${dateFormat(abo.date)}`;
   const cancellation=document.createElement("small");cancellation.className="muted";
@@ -360,7 +375,7 @@ function render(){
     subscriptions.splice(index,1);if(editingIndex===index)resetForm();save();
    }
   });
-  actions.append(cancel,edit,remove);item.append(heading,details,nextPayment,cancellation,candidateLabel);if(status.textContent)item.append(status);
+  actions.append(cancel,edit,remove);item.append(heading,category,details,nextPayment,cancellation,candidateLabel);if(status.textContent)item.append(status);
   if(reminder)item.append(reminder);item.append(actions);list.appendChild(item);
  });
  document.getElementById("total").textContent=money(monthlyTotal);
@@ -373,6 +388,7 @@ function render(){
  document.getElementById("potentialYearly").textContent=money(potentialMonthly*12);
  updateSavingsGoal(potentialMonthly);
  if(subscriptions.length===0)list.innerHTML='<p class="empty">Noch keine Abos vorhanden.</p>';
+ else if(sorted.length===0)list.innerHTML='<p class="empty">Keine passenden Abos gefunden.</p>';
 }
 
 const SAVINGS_GOAL_KEY="subtrack-savings-goal";
@@ -472,11 +488,12 @@ document.getElementById("aboForm").addEventListener("submit",function(event){
  event.preventDefault();
  const name=document.getElementById("name").value.trim();
  const price=Number(document.getElementById("price").value);
+ const category=document.getElementById("category").value||"Sonstiges";
  const interval=document.getElementById("interval").value;
  const date=document.getElementById("date").value;
  const cancelDate=document.getElementById("cancelDate").value;
  if(!name||!Number.isFinite(price)||price<=0||!date){alert("Bitte fülle Anbieter, einen gültigen Preis und das nächste Zahlungsdatum aus.");return;}
- const subscription={name,price,interval,date,cancelDate};
+ const subscription={name,price,category,interval,date,cancelDate};
  if(editingIndex!==null){
   const existing=subscriptions[editingIndex]||{};
   subscriptions[editingIndex]={...existing,...subscription};
@@ -484,7 +501,7 @@ document.getElementById("aboForm").addEventListener("submit",function(event){
  save();resetForm();render();
 });
 document.getElementById("exportData").addEventListener("click",()=>{
- const backup={app:"SubTrack",version:2,exportedAt:new Date().toISOString(),savingsGoal:localStorage.getItem(SAVINGS_GOAL_KEY)||"",subscriptions};
+ const backup={app:"SubTrack",version:3,exportedAt:new Date().toISOString(),savingsGoal:localStorage.getItem(SAVINGS_GOAL_KEY)||"",subscriptions};
  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
  const link=document.createElement("a");
@@ -506,7 +523,7 @@ document.getElementById("importFile").addEventListener("change",async(event)=>{
    throw new Error("Ungültiges Sicherungsformat");
   }
   if(!confirm("Beim Import werden die aktuell gespeicherten Abos durch die Sicherung ersetzt. Möchtest du fortfahren?"))return;
-  subscriptions=incoming.map(item=>({...item}));
+  subscriptions=incoming.map(item=>({...item,category:item.category||"Sonstiges"}));
   localStorage.setItem(STORAGE_KEY,JSON.stringify(subscriptions));
   if(parsed&&typeof parsed==="object"&&parsed.savingsGoal!==undefined)localStorage.setItem(SAVINGS_GOAL_KEY,String(parsed.savingsGoal));
   resetForm();render();
@@ -518,6 +535,8 @@ document.getElementById("importFile").addEventListener("change",async(event)=>{
 });
 document.getElementById("cancelEdit").addEventListener("click",resetForm);
 document.getElementById("sortOrder").addEventListener("change",render);
+document.getElementById("searchSubscriptions").addEventListener("input",render);
+document.getElementById("categoryFilter").addEventListener("change",render);
 document.getElementById("refreshLetter").addEventListener("click",updateLetter);
 document.getElementById("copyLetter").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(document.getElementById("letterPreview").value);alert("Kündigungstext wurde kopiert.");}catch(error){document.getElementById("letterPreview").select();alert("Bitte kopiere den markierten Text mit Cmd+C (Mac) oder Strg+C.");}});
 document.getElementById("sendLetter").addEventListener("click",()=>{
