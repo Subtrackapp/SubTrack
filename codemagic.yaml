@@ -32,6 +32,12 @@ workflows:
           mkdir -p www
           cp index.html www/
 
+      - name: Check Capacitor configuration
+        script: |
+          set -e
+          cat capacitor.config.json
+          npx cap config
+
       - name: Add iOS platform if needed
         script: |
           set -e
@@ -58,4 +64,4 @@ workflows:
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/**/*.xcarchive
+      - /tmp/xcodebuild_logs/*.log
